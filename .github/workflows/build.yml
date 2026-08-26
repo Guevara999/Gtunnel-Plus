@@ -16,52 +16,44 @@ jobs:
       with:
         submodules: recursive
 
-    # ---- Java ----
     - name: Set up JDK 17
-      uses: actions/setup-java@v5    # Updated to v5
+      uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # ---- Android SDK & NDK ----
     - name: Set up Android SDK & NDK
       uses: android-actions/setup-android@v3
       with:
-        # Use 'packages' to install specific build-tools and NDK
         packages: 'platforms;android-34 build-tools;34.0.0 ndk;27.3.13750724'
 
-    # ---- Go ----
     - name: Set up Go 1.24
       uses: actions/setup-go@v5
       with:
         go-version: '1.24'
-        # If you have a go.sum, it will be used for caching; we'll generate it later
 
-    # ---- Install gomobile ----
     - name: Install gomobile
       run: |
         go install golang.org/x/mobile/cmd/gomobile@latest
         gomobile init
 
-    # ---- Build libbox.aar from source ----
     - name: Clone sing-box and build libbox
       run: |
         git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
         cd sing-box
-        # Ensure go.mod is tidy and create go.sum (optional but recommended)
         go mod tidy
-        # Add the mobile dependency as a tool
         go get -tool golang.org/x/mobile/cmd/gobind
-        # Build the AAR for Android with API 21
         gomobile bind -target=android -androidapi 21 -o libbox.aar ./experimental/libbox
-        # Copy it to the app's libs folder
         mkdir -p ../app/libs
         cp libbox.aar ../app/libs/
 
     - name: Verify libbox.aar
       run: ls -la app/libs/libbox.aar
 
-    # ---- Build the Android app ----
+    # ===== NEW STEP: Remove Xposed source =====
+    - name: Remove Xposed hooks
+      run: rm -rf app/src/main/java/io/nekohasekai/sfa/xposed
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
