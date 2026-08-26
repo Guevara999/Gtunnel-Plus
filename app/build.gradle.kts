@@ -116,16 +116,17 @@ android {
         }
     }
 
+    // ===== FIXED SOURCE SETS =====
     sourceSets {
         getByName("play") {
-            java.srcDirs("src/minApi24/java")
-            aidl.srcDirs("src/minApi24/aidl")
+            java.setSrcDirs(listOf("src/minApi24/java"))
+            aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
 
         getByName("other") {
             java {
-                srcDirs("src/minApi24/java", "src/github/java")
-                // Exclude all optional features – these are not needed for SSH + payload injection
+                setSrcDirs(listOf("src/minApi24/java", "src/github/java"))
+                // Exclude optional features – these cause 1200+ errors
                 exclude("**/xposed/**")
                 exclude("**/terminal/**")
                 exclude("**/usbip/**")
@@ -142,12 +143,12 @@ android {
                 exclude("**/networkquality/**")
                 exclude("**/stun/**")
             }
-            aidl.srcDirs("src/minApi24/aidl")
+            aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
 
         getByName("otherLegacy") {
             java {
-                srcDirs("src/minApi21/java", "src/github/java")
+                setSrcDirs(listOf("src/minApi21/java", "src/github/java"))
                 // Same exclusions
                 exclude("**/xposed/**")
                 exclude("**/terminal/**")
@@ -165,7 +166,7 @@ android {
                 exclude("**/networkquality/**")
                 exclude("**/stun/**")
             }
-            aidl.srcDirs("src/minApi24/aidl")
+            aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
     }
 
