@@ -18,6 +18,12 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
+// ============ ADD CUSTOM REPOSITORY FOR libbox ============
+repositories {
+    mavenCentral()
+    maven { url = uri("https://maven.nekohasekai.io/repository/maven-public/") }
+}
+
 fun getProps(propName: String): String {
     val propsInEnv = System.getenv("LOCAL_PROPERTIES")
     if (propsInEnv != null) {
@@ -184,7 +190,7 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // ============ libbox – from Maven Central (with fallback version) ============
+    // ============ libbox – from Maven Custom Repository ============
     implementation("io.nekohasekai:libbox:$libboxVersion")
 
     // API level specific versions (unchanged)
