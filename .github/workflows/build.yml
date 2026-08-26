@@ -23,11 +23,26 @@ jobs:
       with:
         packages: 'platforms;android-34 build-tools;34.0.0 ndk;27.3.13750724'
 
-    # ---- Remove Xposed source (extra safety) ----
-    - name: Remove Xposed hooks
-      run: rm -rf app/src/main/java/io/nekohasekai/sfa/xposed
+    # Delete all optional source folders – this prevents 1200+ errors
+    - name: Remove optional features (Xposed, Terminal, USBIP, Vendor, Tailscale, etc.)
+      run: |
+        rm -rf app/src/main/java/io/nekohasekai/sfa/xposed
+        rm -rf app/src/main/java/io/nekohasekai/sfa/terminal
+        rm -rf app/src/main/java/io/nekohasekai/sfa/usbip
+        rm -rf app/src/main/java/io/nekohasekai/sfa/vendor
+        rm -rf app/src/main/java/io/nekohasekai/sfa/compose/screen/tools
+        rm -rf app/src/main/java/io/nekohasekai/sfa/tailscale
+        rm -rf app/src/main/java/io/nekohasekai/sfa/openconnect
+        rm -rf app/src/main/java/io/nekohasekai/sfa/openvpn
+        rm -rf app/src/main/java/io/nekohasekai/sfa/networkquality
+        rm -rf app/src/main/java/io/nekohasekai/sfa/stun
+        rm -f  app/src/main/java/io/nekohasekai/sfa/bg/RootClient.kt
+        rm -f  app/src/main/java/io/nekohasekai/sfa/bg/RootServer.kt
+        rm -f  app/src/main/java/io/nekohasekai/sfa/utils/HookErrorClient.kt
+        rm -f  app/src/main/java/io/nekohasekai/sfa/utils/HookStatusClient.kt
+        rm -f  app/src/main/java/io/nekohasekai/sfa/utils/PrivilegeSettingsClient.kt
 
-    # ---- Check if libbox.aar exists ----
+    # Check for libbox.aar; build it if missing
     - name: Check for libbox.aar
       id: check_aar
       run: |
@@ -37,7 +52,6 @@ jobs:
           echo "found=false" >> $GITHUB_OUTPUT
         fi
 
-    # ---- Build libbox.aar only if missing ----
     - name: Set up Go (if AAR missing)
       if: steps.check_aar.outputs.found == 'false'
       uses: actions/setup-go@v5
