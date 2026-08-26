@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-// ==== Fallback repositories in case settings block misses something ====
+// Fallback repositories (they are also in settings.gradle.kts)
 repositories {
     google()
     mavenCentral()
@@ -181,27 +181,18 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // ===== libbox – use the local AAR built from source =====
+    // === libbox – local AAR built from source ===
     implementation(files("libs/libbox.aar"))
 
-    // ===== Essential libraries (kept) =====
-    val lifecycleVersion24 = "2.11.0"
-    val roomVersion24 = "2.8.4"
-    val workVersion24 = "2.11.2"
-    val cameraVersion24 = "1.6.1"
-    val browserVersion24 = "1.10.0"
-    val webkitVersion24 = "1.16.0"
-    val coreVersion24 = "1.19.0"
-    val materialVersion24 = "1.14.0"
-
-    val lifecycleVersion21 = "2.9.4"
-    val roomVersion21 = "2.7.2"
-    val workVersion21 = "2.10.5"
-    val cameraVersion21 = "1.4.2"
-    val browserVersion21 = "1.9.0"
-    val webkitVersion21 = "1.14.0"
-    val coreVersion21 = "1.17.0"
-    val materialVersion21 = "1.13.0"
+    // === Essential AndroidX & Compose ===
+    val lifecycleVersion = "2.11.0"
+    val roomVersion = "2.8.4"
+    val workVersion = "2.11.2"
+    val cameraVersion = "1.6.1"
+    val browserVersion = "1.10.0"
+    val webkitVersion = "1.16.0"
+    val coreVersion = "1.19.0"
+    val materialVersion = "1.14.0"
 
     // Common
     implementation("androidx.appcompat:appcompat:1.7.1")
@@ -218,142 +209,107 @@ dependencies {
     }
     implementation("com.google.guava:guava:33.6.0-android")
 
-    // API 24+
-    "playImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion24")
-    "playImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion24")
-    "playImplementation"("androidx.lifecycle:lifecycle-process:$lifecycleVersion24")
-    "playImplementation"("androidx.room:room-runtime:$roomVersion24")
-    "playImplementation"("androidx.work:work-runtime-ktx:$workVersion24")
-    "playImplementation"("androidx.camera:camera-view:$cameraVersion24")
-    "playImplementation"("androidx.camera:camera-lifecycle:$cameraVersion24")
-    "playImplementation"("androidx.camera:camera-camera2:$cameraVersion24")
-    "playImplementation"("androidx.browser:browser:$browserVersion24")
-    "playImplementation"("androidx.webkit:webkit:$webkitVersion24")
-    "playImplementation"("androidx.core:core-ktx:$coreVersion24")
-    "playImplementation"("com.google.android.material:material:$materialVersion24")
-    "playAnnotationProcessor"("androidx.room:room-compiler:$roomVersion24")
-    "kspPlay"("androidx.room:room-compiler:$roomVersion24")
+    // API 24+ (play & other)
+    listOf("play", "other").forEach { flavor ->
+        add("${flavor}Implementation", "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+        add("${flavor}Implementation", "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+        add("${flavor}Implementation", "androidx.lifecycle:lifecycle-process:$lifecycleVersion")
+        add("${flavor}Implementation", "androidx.room:room-runtime:$roomVersion")
+        add("${flavor}Implementation", "androidx.work:work-runtime-ktx:$workVersion")
+        add("${flavor}Implementation", "androidx.camera:camera-view:$cameraVersion")
+        add("${flavor}Implementation", "androidx.camera:camera-lifecycle:$cameraVersion")
+        add("${flavor}Implementation", "androidx.camera:camera-camera2:$cameraVersion")
+        add("${flavor}Implementation", "androidx.browser:browser:$browserVersion")
+        add("${flavor}Implementation", "androidx.webkit:webkit:$webkitVersion")
+        add("${flavor}Implementation", "androidx.core:core-ktx:$coreVersion")
+        add("${flavor}Implementation", "com.google.android.material:material:$materialVersion")
+        add("ksp${flavor.capitalize()}", "androidx.room:room-compiler:$roomVersion")
+    }
 
-    "otherImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion24")
-    "otherImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion24")
-    "otherImplementation"("androidx.lifecycle:lifecycle-process:$lifecycleVersion24")
-    "otherImplementation"("androidx.room:room-runtime:$roomVersion24")
-    "otherImplementation"("androidx.work:work-runtime-ktx:$workVersion24")
-    "otherImplementation"("androidx.camera:camera-view:$cameraVersion24")
-    "otherImplementation"("androidx.camera:camera-lifecycle:$cameraVersion24")
-    "otherImplementation"("androidx.camera:camera-camera2:$cameraVersion24")
-    "otherImplementation"("androidx.browser:browser:$browserVersion24")
-    "otherImplementation"("androidx.webkit:webkit:$webkitVersion24")
-    "otherImplementation"("androidx.core:core-ktx:$coreVersion24")
-    "otherImplementation"("com.google.android.material:material:$materialVersion24")
-    "kspOther"("androidx.room:room-compiler:$roomVersion24")
+    // API 21 (otherLegacy)
+    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:2.9.4")
+    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
+    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-process:2.9.4")
+    "otherLegacyImplementation"("androidx.room:room-runtime:2.7.2")
+    "otherLegacyImplementation"("androidx.work:work-runtime-ktx:2.10.5")
+    "otherLegacyImplementation"("androidx.camera:camera-view:1.4.2")
+    "otherLegacyImplementation"("androidx.camera:camera-lifecycle:1.4.2")
+    "otherLegacyImplementation"("androidx.camera:camera-camera2:1.4.2")
+    "otherLegacyImplementation"("androidx.browser:browser:1.9.0")
+    "otherLegacyImplementation"("androidx.webkit:webkit:1.14.0")
+    "otherLegacyImplementation"("androidx.core:core-ktx:1.17.0")
+    "otherLegacyImplementation"("com.google.android.material:material:1.13.0")
+    "kspOtherLegacy"("androidx.room:room-compiler:2.7.2")
 
-    // API 21
-    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion21")
-    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion21")
-    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-process:$lifecycleVersion21")
-    "otherLegacyImplementation"("androidx.room:room-runtime:$roomVersion21")
-    "otherLegacyImplementation"("androidx.work:work-runtime-ktx:$workVersion21")
-    "otherLegacyImplementation"("androidx.camera:camera-view:$cameraVersion21")
-    "otherLegacyImplementation"("androidx.camera:camera-lifecycle:$cameraVersion21")
-    "otherLegacyImplementation"("androidx.camera:camera-camera2:$cameraVersion21")
-    "otherLegacyImplementation"("androidx.browser:browser:$browserVersion21")
-    "otherLegacyImplementation"("androidx.webkit:webkit:$webkitVersion21")
-    "otherLegacyImplementation"("androidx.core:core-ktx:$coreVersion21")
-    "otherLegacyImplementation"("com.google.android.material:material:$materialVersion21")
-    "kspOtherLegacy"("androidx.room:room-compiler:$roomVersion21")
-
-    // Sora editor
+    // Sora editor (for configuration editing)
     val soraVersion = "0.23.6"
     val treeSitterVersion = "4.3.2"
-    "playImplementation"("io.github.Rosemoe.sora-editor:editor:$soraVersion")
-    "playImplementation"("io.github.Rosemoe.sora-editor:language-treesitter:$soraVersion")
-    "playImplementation"("com.itsaky.androidide.treesitter:android-tree-sitter:$treeSitterVersion")
-    "playImplementation"("com.itsaky.androidide.treesitter:tree-sitter-json:$treeSitterVersion")
-    "otherImplementation"("io.github.Rosemoe.sora-editor:editor:$soraVersion")
-    "otherImplementation"("io.github.Rosemoe.sora-editor:language-treesitter:$soraVersion")
-    "otherImplementation"("com.itsaky.androidide.treesitter:android-tree-sitter:$treeSitterVersion")
-    "otherImplementation"("com.itsaky.androidide.treesitter:tree-sitter-json:$treeSitterVersion")
+    listOf("play", "other").forEach { flavor ->
+        add("${flavor}Implementation", "io.github.Rosemoe.sora-editor:editor:$soraVersion")
+        add("${flavor}Implementation", "io.github.Rosemoe.sora-editor:language-treesitter:$soraVersion")
+        add("${flavor}Implementation", "com.itsaky.androidide.treesitter:android-tree-sitter:$treeSitterVersion")
+        add("${flavor}Implementation", "com.itsaky.androidide.treesitter:tree-sitter-json:$treeSitterVersion")
+    }
     "otherLegacyImplementation"("com.blacksquircle.ui:editorkit:2.2.0")
     "otherLegacyImplementation"("com.blacksquircle.ui:language-json:2.2.0")
 
-    // Play Store
+    // Play Store specific
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "playImplementation"("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
-    // Shizuku (kept – from mavenCentral)
+    // Shizuku (optional, but safe)
     val shizukuVersion = "13.1.5"
-    "playImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
-    "playImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
-    "otherImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
-    "otherImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
+    listOf("play", "other").forEach { flavor ->
+        add("${flavor}Implementation", "dev.rikka.shizuku:api:$shizukuVersion")
+        add("${flavor}Implementation", "dev.rikka.shizuku:provider:$shizukuVersion")
+    }
 
-    // Compose – API 24+
-    val composeBom24 = platform("androidx.compose:compose-bom:2026.06.01")
-    val activityVersion24 = "1.13.0"
-    val lifecycleComposeVersion24 = "2.11.0"
-    "playImplementation"(composeBom24)
-    "playImplementation"("androidx.compose.material3:material3")
-    "playImplementation"("androidx.compose.material3.adaptive:adaptive")
-    "playImplementation"("androidx.compose.ui:ui")
-    "playImplementation"("androidx.compose.ui:ui-tooling-preview")
-    "playImplementation"("androidx.compose.material:material-icons-extended")
-    "playImplementation"("androidx.activity:activity-compose:$activityVersion24")
-    "playImplementation"("androidx.navigation:navigation-compose:2.9.8")
-    "playImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion24")
-    "playImplementation"("androidx.compose.runtime:runtime-livedata")
-
-    "otherImplementation"(composeBom24)
-    "otherImplementation"("androidx.compose.material3:material3")
-    "otherImplementation"("androidx.compose.material3.adaptive:adaptive")
-    "otherImplementation"("androidx.compose.ui:ui")
-    "otherImplementation"("androidx.compose.ui:ui-tooling-preview")
-    "otherImplementation"("androidx.compose.material:material-icons-extended")
-    "otherImplementation"("androidx.activity:activity-compose:$activityVersion24")
-    "otherImplementation"("androidx.navigation:navigation-compose:2.9.8")
-    "otherImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion24")
-    "otherImplementation"("androidx.compose.runtime:runtime-livedata")
-
-    // Compose – API 21
-    val composeBom21 = platform("androidx.compose:compose-bom:2025.01.00")
-    val activityVersion21 = "1.11.0"
-    val lifecycleComposeVersion21 = "2.9.4"
-    "otherLegacyImplementation"(composeBom21)
+    // Compose
+    val composeBom = platform("androidx.compose:compose-bom:2026.06.01")
+    val activityVersion = "1.13.0"
+    val lifecycleComposeVersion = "2.11.0"
+    listOf("play", "other").forEach { flavor ->
+        add("${flavor}Implementation", composeBom)
+        add("${flavor}Implementation", "androidx.compose.material3:material3")
+        add("${flavor}Implementation", "androidx.compose.material3.adaptive:adaptive")
+        add("${flavor}Implementation", "androidx.compose.ui:ui")
+        add("${flavor}Implementation", "androidx.compose.ui:ui-tooling-preview")
+        add("${flavor}Implementation", "androidx.compose.material:material-icons-extended")
+        add("${flavor}Implementation", "androidx.activity:activity-compose:$activityVersion")
+        add("${flavor}Implementation", "androidx.navigation:navigation-compose:2.9.8")
+        add("${flavor}Implementation", "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion")
+        add("${flavor}Implementation", "androidx.compose.runtime:runtime-livedata")
+    }
+    // Legacy Compose
+    val composeBomLegacy = platform("androidx.compose:compose-bom:2025.01.00")
+    "otherLegacyImplementation"(composeBomLegacy)
     "otherLegacyImplementation"("androidx.compose.material3:material3")
     "otherLegacyImplementation"("androidx.compose.material3.adaptive:adaptive")
     "otherLegacyImplementation"("androidx.compose.ui:ui")
     "otherLegacyImplementation"("androidx.compose.ui:ui-tooling-preview")
     "otherLegacyImplementation"("androidx.compose.material:material-icons-extended")
-    "otherLegacyImplementation"("androidx.activity:activity-compose:$activityVersion21")
+    "otherLegacyImplementation"("androidx.activity:activity-compose:1.11.0")
     "otherLegacyImplementation"("androidx.navigation:navigation-compose:2.9.8")
-    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion21")
+    "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
     "otherLegacyImplementation"("androidx.compose.runtime:runtime-livedata")
 
-    // Debug/test
+    // Debug & test
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    "androidTestPlayImplementation"(composeBom24)
-    "androidTestOtherImplementation"(composeBom24)
-    "androidTestOtherLegacyImplementation"(composeBom21)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
-    // Compose extras
+    // Utility
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
-    // implementation("com.github.jeziellago:compose-markdown:0.7.2")  // REMOVED
 
-    // =================================================================
-    // The following dependencies have been REMOVED because they are not
-    // essential for SSH + payload injection and caused resolution problems.
-    // If you need them later, restore them with the correct repository.
-    // =================================================================
-    // Terminal emulator (libghostty) – removed
-    // Root (libsu) – removed
+    // ============================================================
+    // ❌ REMOVED (commented out) to avoid dependency resolution errors:
+    // - libghostty (terminal emulator)
+    // - compose-markdown
+    // - libsu (root)
+    // ============================================================
 }
 
-// For libghostty snapshots – no longer needed since we removed it
-configurations.configureEach {
-    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
-}
+// No more configurations for libghostty snapshots – removed.
 
 val playCredentialsJSON = rootProject.file("service-account-credentials.json")
 if (playCredentialsJSON.exists()) {
