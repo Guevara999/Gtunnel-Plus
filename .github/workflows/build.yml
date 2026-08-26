@@ -2,7 +2,7 @@ name: Build Gtunnel APK
 
 on:
   push:
-    branches: [ "main", "master", "Dev" ]
+  # remove branches: [] to run on all branches
   pull_request:
   workflow_dispatch:
 
@@ -27,32 +27,13 @@ jobs:
       with:
         packages: 'platforms;android-34 build-tools;34.0.0 ndk;27.3.13750724'
 
-    - name: Set up Go 1.24
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
+    # Remove Xposed hooks (causes "Unresolved reference" errors)
+    - name: Remove Xposed source
+      run: rm -rf app/src/main/java/io/nekohasekai/sfa/xposed
 
-    - name: Install gomobile
-      run: |
-        go install golang.org/x/mobile/cmd/gomobile@latest
-        gomobile init
-
-    - name: Clone sing-box and build libbox
-      run: |
-        git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
-        cd sing-box
-        go mod tidy
-        go get -tool golang.org/x/mobile/cmd/gobind
-        gomobile bind -target=android -androidapi 21 -o libbox.aar ./experimental/libbox
-        mkdir -p ../app/libs
-        cp libbox.aar ../app/libs/
-
+    # Verify the AAR exists (no rebuild needed)
     - name: Verify libbox.aar
       run: ls -la app/libs/libbox.aar
-
-    # ===== NEW STEP: Remove Xposed source =====
-    - name: Remove Xposed hooks
-      run: rm -rf app/src/main/java/io/nekohasekai/sfa/xposed
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
