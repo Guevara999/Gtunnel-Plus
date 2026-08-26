@@ -18,11 +18,7 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-// ============ ADD CUSTOM REPOSITORY FOR libbox ============
-repositories {
-    mavenCentral()
-    maven { url = uri("https://maven.nekohasekai.io/repository/maven-public/") }
-}
+// No repositories block – it's now in settings.gradle.kts
 
 fun getProps(propName: String): String {
     val propsInEnv = System.getenv("LOCAL_PROPERTIES")
