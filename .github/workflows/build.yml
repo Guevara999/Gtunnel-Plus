@@ -27,10 +27,10 @@ jobs:
         ndk: '28.0.13004108'
         build-tools: '34.0.0'
 
-    - name: Set up Go
+    - name: Set up Go 1.24
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22'
+        go-version: '1.24'   # This supports the '-tool' flag
 
     - name: Install gomobile
       run: |
@@ -41,7 +41,8 @@ jobs:
       run: |
         git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
         cd sing-box
-        go get -tool golang.org/x/mobile/cmd/gobind   # <-- FIX: adds tool directive
+        # Now works because Go 1.24+ supports '-tool'
+        go get -tool golang.org/x/mobile/cmd/gobind
 
     - name: Build libbox.aar
       run: |
