@@ -24,8 +24,7 @@ jobs:
     - name: Set up Android SDK & NDK
       uses: android-actions/setup-android@v3
       with:
-        # Use the same NDK that comes with the runner, no need to install a specific version
-        ndk: '27.3.13750724'   # This is already present on the runner
+        ndk: '27.3.13750724'   # default NDK on runner
         build-tools: '34.0.0'
 
     - name: Set up Go 1.24
@@ -44,10 +43,9 @@ jobs:
         cd sing-box
         go get -tool golang.org/x/mobile/cmd/gobind
 
-    - name: Build libbox.aar (with explicit API 21)
+    - name: Build libbox.aar
       run: |
         cd sing-box
-        # Use -androidapi 21 to override the default API level (16) that causes errors
         gomobile bind -target=android -androidapi 21 -o libbox.aar ./experimental/libbox
         mkdir -p ../app/libs
         cp libbox.aar ../app/libs/
