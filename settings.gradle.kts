@@ -7,20 +7,15 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    // This setting forces all repositories to be declared here (not in subprojects)
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    
     repositories {
         google()
         mavenCentral()
-        
-        // ============ ADD CUSTOM REPOSITORY FOR libbox ============
-        maven {
-            url = uri("https://maven.nekohasekai.io/repository/maven-public/")
-        }
+        // The custom Maven repository has been removed – we now use a local libbox.aar
     }
 }
 
 rootProject.name = "Gtunnel-Plus"
 include(":app")
-// include any other modules you have (e.g., ":libxposed-api")
+// If you have other modules, include them here (e.g., ":libxposed-api")
+// include(":libxposed-api")
