@@ -118,14 +118,14 @@ android {
 
     sourceSets {
         getByName("play") {
-            java.directories.add("src/minApi24/java")
-            aidl.directories.add("src/minApi24/aidl")
+            java.srcDirs("src/minApi24/java")
+            aidl.srcDirs("src/minApi24/aidl")
         }
+
         getByName("other") {
-            java.directories.addAll(listOf("src/minApi24/java", "src/github/java"))
-            aidl.directories.add("src/minApi24/aidl")
-            // ===== EXCLUDE OPTIONAL FEATURES =====
             java {
+                srcDirs("src/minApi24/java", "src/github/java")
+                // Exclude all optional features – these are not needed for SSH + payload injection
                 exclude("**/xposed/**")
                 exclude("**/terminal/**")
                 exclude("**/usbip/**")
@@ -142,12 +142,13 @@ android {
                 exclude("**/networkquality/**")
                 exclude("**/stun/**")
             }
+            aidl.srcDirs("src/minApi24/aidl")
         }
+
         getByName("otherLegacy") {
-            java.directories.addAll(listOf("src/minApi21/java", "src/github/java"))
-            aidl.directories.add("src/minApi24/aidl")
-            // Apply same exclusions for legacy variant
             java {
+                srcDirs("src/minApi21/java", "src/github/java")
+                // Same exclusions
                 exclude("**/xposed/**")
                 exclude("**/terminal/**")
                 exclude("**/usbip/**")
@@ -164,6 +165,7 @@ android {
                 exclude("**/networkquality/**")
                 exclude("**/stun/**")
             }
+            aidl.srcDirs("src/minApi24/aidl")
         }
     }
 
@@ -261,7 +263,13 @@ dependencies {
         add("${flavor}Implementation", "androidx.webkit:webkit:$webkitVersion")
         add("${flavor}Implementation", "androidx.core:core-ktx:$coreVersion")
         add("${flavor}Implementation", "com.google.android.material:material:$materialVersion")
-        add("ksp${flavor.capitalize()}", "androidx.room:room-compiler:$roomVersion")
+        // Fix deprecated capitalize()
+        val kspFlavor = when (flavor) {
+            "play" -> "kspPlay"
+            "other" -> "kspOther"
+            else -> "ksp${flavor.replaceFirstChar { it.uppercase() }}"
+        }
+        add(kspFlavor, "androidx.room:room-compiler:$roomVersion")
     }
 
     // API 21 (otherLegacy)
@@ -338,14 +346,7 @@ dependencies {
 
     // Utility
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
-
-    // ============================================================
-    // Optional features removed (libghostty, libsu, compose-markdown, etc.)
-    // They are excluded by sourceSets exclusions above.
-    // ============================================================
 }
-
-// No configurations needed for removed snapshots.
 
 val playCredentialsJSON = rootProject.file("service-account-credentials.json")
 if (playCredentialsJSON.exists()) {
