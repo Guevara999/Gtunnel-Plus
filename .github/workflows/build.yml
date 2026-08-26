@@ -2,10 +2,18 @@ name: Build Gtunnel APK
 
 on:
   push:
-    branches: [ "main", "master", "develop" ]
+    # Trigger on pushes to these branches
+    branches:
+      - main
+      - master
+      - Dev          # <-- ADDED your current branch
+      # To run on ANY branch, remove the 'branches' block entirely
   pull_request:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+    branches:
+      - main
+      - master
+      - Dev
+  workflow_dispatch:   # Allows manual trigger from GitHub UI
 
 jobs:
   build:
@@ -26,22 +34,22 @@ jobs:
     - name: Set up Android SDK & NDK
       uses: android-actions/setup-android@v3
       with:
-        ndk: '26.3.11579264'
+        ndk: '28.0.13004108'          # Match your ndkVersion in build.gradle.kts
         build-tools: '34.0.0'
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 🔍 List available assemble tasks (to see what variants exist)
+    # Optional: list available tasks (useful for debugging)
     - name: List available Gradle tasks
       run: ./gradlew tasks --all | grep -i assemble
 
-    # 🛠️ Build debug APK (no signing required)
+    # Build debug APK (no signing required)
     - name: Build Debug APK
       run: |
         ./gradlew :app:assembleDebug --stacktrace
 
-    # 📦 Upload the debug APK as "Gtunnel"
+    # Upload the debug APK as "Gtunnel"
     - name: Upload Gtunnel Debug APK
       uses: actions/upload-artifact@v4
       with:
