@@ -366,9 +366,12 @@ dependencies {
     "otherImplementation"("io.github.sagernet:libghostty-android-compose:$libghosttyVersion")
     "otherLegacyImplementation"("io.github.sagernet:libghostty-android-compose-legacy:$libghosttyVersion")
 
-    // Xposed API for self-hooking VPN hide module
-    compileOnly("de.robv.android.xposed:api:82")
-    compileOnly(project(":libxposed-api"))
+    // ================================================================
+    // Xposed dependencies removed because the module is not included.
+    // If you need them, add the module to settings.gradle.kts.
+    // compileOnly("de.robv.android.xposed:api:82")
+    // compileOnly(project(":libxposed-api"))
+    // ================================================================
 }
 
 // For libghostty-android snapshots; remove after release.
