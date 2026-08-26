@@ -9,7 +9,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    // ❌ Removed: id("org.jetbrains.kotlin.android")  // no longer needed with AGP 9.0+
+    // id("org.jetbrains.kotlin.android")  // ❌ Removed – no longer needed
     id("org.jetbrains.kotlin.plugin.parcelize")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -18,7 +18,6 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-// Fallback repositories
 repositories {
     google()
     mavenCentral()
@@ -61,8 +60,7 @@ android {
     compileSdk = 37
     compileSdkMinor = 1
 
-    // Match the NDK version installed in the workflow
-    ndkVersion = "27.3.13750724"
+    ndkVersion = "27.3.13750724"  // Match workflow
 
     System.getenv("ANDROID_NDK_HOME")?.let { ndkPath = it }
 
@@ -116,56 +114,18 @@ android {
         }
     }
 
-    // ===== FIXED SOURCE SETS WITH EXCLUSIONS =====
+    // Simple source sets – no exclusions (we'll delete folders in workflow)
     sourceSets {
         getByName("play") {
             java.setSrcDirs(listOf("src/minApi24/java"))
             aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
-
         getByName("other") {
-            java {
-                setSrcDirs(listOf("src/minApi24/java", "src/github/java"))
-                // Exclude optional features – these cause 1200+ errors
-                exclude("**/xposed/**")
-                exclude("**/terminal/**")
-                exclude("**/usbip/**")
-                exclude("**/vendor/**")
-                exclude("**/compose/screen/tools/**")
-                exclude("**/bg/RootClient.kt")
-                exclude("**/bg/RootServer.kt")
-                exclude("**/utils/HookErrorClient.kt")
-                exclude("**/utils/HookStatusClient.kt")
-                exclude("**/utils/PrivilegeSettingsClient.kt")
-                exclude("**/tailscale/**")
-                exclude("**/openconnect/**")
-                exclude("**/openvpn/**")
-                exclude("**/networkquality/**")
-                exclude("**/stun/**")
-            }
+            java.setSrcDirs(listOf("src/minApi24/java", "src/github/java"))
             aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
-
         getByName("otherLegacy") {
-            java {
-                setSrcDirs(listOf("src/minApi21/java", "src/github/java"))
-                // Same exclusions
-                exclude("**/xposed/**")
-                exclude("**/terminal/**")
-                exclude("**/usbip/**")
-                exclude("**/vendor/**")
-                exclude("**/compose/screen/tools/**")
-                exclude("**/bg/RootClient.kt")
-                exclude("**/bg/RootServer.kt")
-                exclude("**/utils/HookErrorClient.kt")
-                exclude("**/utils/HookStatusClient.kt")
-                exclude("**/utils/PrivilegeSettingsClient.kt")
-                exclude("**/tailscale/**")
-                exclude("**/openconnect/**")
-                exclude("**/openvpn/**")
-                exclude("**/networkquality/**")
-                exclude("**/stun/**")
-            }
+            java.setSrcDirs(listOf("src/minApi21/java", "src/github/java"))
             aidl.setSrcDirs(listOf("src/minApi24/aidl"))
         }
     }
@@ -205,16 +165,18 @@ android {
     lint {
         fatal += "NewApi"
     }
+}
 
-    applicationVariants.configureEach {
-        outputs.configureEach {
-            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            var fileName = output.outputFileName
-            fileName = fileName.replace("-release", "")
-            fileName = fileName.replace("-play", "-play")
-            fileName = fileName.replace("-otherLegacy", "-legacy-android-5")
-            fileName = fileName.replace("-other", "")
+// Use the new AndroidComponents extension to rename APKs
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val fileName = output.outputFileName
             output.outputFileName = fileName
+                .replace("-release", "")
+                .replace("-play", "-play")
+                .replace("-otherLegacy", "-legacy-android-5")
+                .replace("-other", "")
         }
     }
 }
@@ -222,13 +184,9 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // === libbox – local AAR built from source ===
     implementation(files("libs/libbox.aar"))
-
-    // === Add Kotlin stdlib explicitly (AGP 9.0+ built‑in Kotlin may not include it) ===
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.20")
 
-    // === Essential AndroidX & Compose ===
     val lifecycleVersion = "2.11.0"
     val roomVersion = "2.8.4"
     val workVersion = "2.11.2"
@@ -238,7 +196,6 @@ dependencies {
     val coreVersion = "1.19.0"
     val materialVersion = "1.14.0"
 
-    // Common
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.8")
@@ -253,7 +210,6 @@ dependencies {
     }
     implementation("com.google.guava:guava:33.6.0-android")
 
-    // API 24+ (play & other)
     listOf("play", "other").forEach { flavor ->
         add("${flavor}Implementation", "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
         add("${flavor}Implementation", "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -267,7 +223,6 @@ dependencies {
         add("${flavor}Implementation", "androidx.webkit:webkit:$webkitVersion")
         add("${flavor}Implementation", "androidx.core:core-ktx:$coreVersion")
         add("${flavor}Implementation", "com.google.android.material:material:$materialVersion")
-        // Fix deprecated capitalize()
         val kspFlavor = when (flavor) {
             "play" -> "kspPlay"
             "other" -> "kspOther"
@@ -276,7 +231,6 @@ dependencies {
         add(kspFlavor, "androidx.room:room-compiler:$roomVersion")
     }
 
-    // API 21 (otherLegacy)
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:2.9.4")
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-process:2.9.4")
@@ -291,7 +245,6 @@ dependencies {
     "otherLegacyImplementation"("com.google.android.material:material:1.13.0")
     "kspOtherLegacy"("androidx.room:room-compiler:2.7.2")
 
-    // Sora editor
     val soraVersion = "0.23.6"
     val treeSitterVersion = "4.3.2"
     listOf("play", "other").forEach { flavor ->
@@ -303,18 +256,15 @@ dependencies {
     "otherLegacyImplementation"("com.blacksquircle.ui:editorkit:2.2.0")
     "otherLegacyImplementation"("com.blacksquircle.ui:language-json:2.2.0")
 
-    // Play Store
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "playImplementation"("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
-    // Shizuku (optional)
     val shizukuVersion = "13.1.5"
     listOf("play", "other").forEach { flavor ->
         add("${flavor}Implementation", "dev.rikka.shizuku:api:$shizukuVersion")
         add("${flavor}Implementation", "dev.rikka.shizuku:provider:$shizukuVersion")
     }
 
-    // Compose
     val composeBom = platform("androidx.compose:compose-bom:2026.06.01")
     val activityVersion = "1.13.0"
     val lifecycleComposeVersion = "2.11.0"
@@ -330,7 +280,6 @@ dependencies {
         add("${flavor}Implementation", "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion")
         add("${flavor}Implementation", "androidx.compose.runtime:runtime-livedata")
     }
-    // Legacy Compose
     val composeBomLegacy = platform("androidx.compose:compose-bom:2025.01.00")
     "otherLegacyImplementation"(composeBomLegacy)
     "otherLegacyImplementation"("androidx.compose.material3:material3")
@@ -343,12 +292,9 @@ dependencies {
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
     "otherLegacyImplementation"("androidx.compose.runtime:runtime-livedata")
 
-    // Debug & test
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-
-    // Utility
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
 }
 
