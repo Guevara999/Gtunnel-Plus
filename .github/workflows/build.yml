@@ -30,7 +30,7 @@ jobs:
     - name: Set up Go 1.24
       uses: actions/setup-go@v5
       with:
-        go-version: '1.24'   # This supports the '-tool' flag
+        go-version: '1.24'
 
     - name: Install gomobile
       run: |
@@ -41,10 +41,11 @@ jobs:
       run: |
         git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
         cd sing-box
-        # Now works because Go 1.24+ supports '-tool'
         go get -tool golang.org/x/mobile/cmd/gobind
 
     - name: Build libbox.aar
+      env:
+        ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/28.0.13004108   # <-- FIX
       run: |
         cd sing-box
         gomobile bind -target=android -o libbox.aar ./experimental/libbox
