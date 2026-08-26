@@ -2,7 +2,6 @@ name: Build Gtunnel APK
 
 on:
   push:
-    # Runs on every push to any branch
   pull_request:
   workflow_dispatch:
 
@@ -28,7 +27,6 @@ jobs:
         ndk: '28.0.13004108'
         build-tools: '34.0.0'
 
-    # ============ Build libbox from source ============
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -39,22 +37,22 @@ jobs:
         go install golang.org/x/mobile/cmd/gomobile@latest
         gomobile init
 
-    - name: Clone sing-box and build libbox.aar
+    - name: Clone sing-box and add mobile dependency
       run: |
-        # Use a specific version/tag for reproducibility (e.g., v1.10.0)
         git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
         cd sing-box
-        # Build the AAR for all Android architectures
+        go get -tool golang.org/x/mobile/cmd/gobind
+
+    - name: Build libbox.aar
+      run: |
+        cd sing-box
         gomobile bind -target=android -o libbox.aar ./experimental/libbox
-        # Create the libs folder if it doesn't exist
         mkdir -p ../app/libs
         cp libbox.aar ../app/libs/
-      continue-on-error: false   # fail if libbox build fails
 
-    - name: List libbox.aar to verify
+    - name: Verify libbox.aar
       run: ls -la app/libs/libbox.aar
 
-    # ============ Build the Android app ============
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
