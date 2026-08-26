@@ -18,8 +18,6 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-// No repositories block – it's now in settings.gradle.kts
-
 fun getProps(propName: String): String {
     val propsInEnv = System.getenv("LOCAL_PROPERTIES")
     if (propsInEnv != null) {
@@ -53,11 +51,6 @@ fun getVersionProps(propName: String): String {
         }
     }
     return ""
-}
-
-// ============ Read libbox_version from gradle.properties or fallback ============
-val libboxVersion: String by lazy {
-    project.findProperty("libbox_version") as String? ?: "1.10.0"
 }
 
 android {
@@ -186,8 +179,8 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // ============ libbox – from Maven Custom Repository ============
-    implementation("io.nekohasekai:libbox:$libboxVersion")
+    // ============ libbox – use the local AAR built from source ============
+    implementation(files("libs/libbox.aar"))
 
     // API level specific versions (unchanged)
     val lifecycleVersion24 = "2.11.0"
@@ -208,7 +201,7 @@ dependencies {
     val coreVersion21 = "1.17.0"
     val materialVersion21 = "1.13.0"
 
-    // Common dependencies (no API level difference)
+    // Common dependencies
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.8")
@@ -268,7 +261,7 @@ dependencies {
     "otherLegacyImplementation"("com.google.android.material:material:$materialVersion21")
     "kspOtherLegacy"("androidx.room:room-compiler:$roomVersion21")
 
-    // Configuration editor: sora-editor (tree-sitter) for API 24+, EditorKit kept for legacy
+    // Sora editor
     val soraVersion = "0.23.6"
     val treeSitterVersion = "4.3.2"
     "playImplementation"("io.github.Rosemoe.sora-editor:editor:$soraVersion")
@@ -282,18 +275,18 @@ dependencies {
     "otherLegacyImplementation"("com.blacksquircle.ui:editorkit:2.2.0")
     "otherLegacyImplementation"("com.blacksquircle.ui:language-json:2.2.0")
 
-    // Play Store specific
+    // Play Store
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "playImplementation"("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
-    // Shizuku (play and other flavors, API 24+ only)
+    // Shizuku
     val shizukuVersion = "13.1.5"
     "playImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
     "playImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
     "otherImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
     "otherImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
 
-    // libsu for ROOT package query (all flavors)
+    // libsu
     val libsuVersion = "6.0.0"
     "playImplementation"("com.github.topjohnwu.libsu:core:$libsuVersion")
     "playImplementation"("com.github.topjohnwu.libsu:service:$libsuVersion")
@@ -302,7 +295,7 @@ dependencies {
     "otherLegacyImplementation"("com.github.topjohnwu.libsu:core:$libsuVersion")
     "otherLegacyImplementation"("com.github.topjohnwu.libsu:service:$libsuVersion")
 
-    // Compose dependencies - API 24+ (play/other)
+    // Compose – API 24+
     val composeBom24 = platform("androidx.compose:compose-bom:2026.06.01")
     val activityVersion24 = "1.13.0"
     val lifecycleComposeVersion24 = "2.11.0"
@@ -329,7 +322,7 @@ dependencies {
     "otherImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion24")
     "otherImplementation"("androidx.compose.runtime:runtime-livedata")
 
-    // Compose dependencies - API 21 (otherLegacy)
+    // Compose – API 21
     val composeBom21 = platform("androidx.compose:compose-bom:2025.01.00")
     val activityVersion21 = "1.11.0"
     val lifecycleComposeVersion21 = "2.9.4"
@@ -345,7 +338,7 @@ dependencies {
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion21")
     "otherLegacyImplementation"("androidx.compose.runtime:runtime-livedata")
 
-    // Debug/Test dependencies
+    // Debug/Test
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     "androidTestPlayImplementation"(composeBom24)
@@ -353,7 +346,7 @@ dependencies {
     "androidTestOtherLegacyImplementation"(composeBom21)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
-    // Common Compose-related libraries
+    // Compose extras
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
     implementation("com.github.jeziellago:compose-markdown:0.7.2")
     implementation("org.kodein.emoji:emoji-kt:2.5.0")
@@ -365,16 +358,9 @@ dependencies {
     "playImplementation"("io.github.sagernet:libghostty-android-compose:$libghosttyVersion")
     "otherImplementation"("io.github.sagernet:libghostty-android-compose:$libghosttyVersion")
     "otherLegacyImplementation"("io.github.sagernet:libghostty-android-compose-legacy:$libghosttyVersion")
-
-    // ================================================================
-    // Xposed dependencies removed because the module is not included.
-    // If you need them, add the module to settings.gradle.kts.
-    // compileOnly("de.robv.android.xposed:api:82")
-    // compileOnly(project(":libxposed-api"))
-    // ================================================================
 }
 
-// For libghostty-android snapshots; remove after release.
+// For libghostty-android snapshots
 configurations.configureEach {
     resolutionStrategy.cacheChangingModulesFor(0, "seconds")
 }
