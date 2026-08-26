@@ -18,24 +18,29 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
+// ==== Fallback repositories in case settings block misses something ====
+repositories {
+    google()
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://maven.nekohasekai.io/repository/maven-public/") }
+    maven { url = uri("https://maven.nekohasekai.io/repository/maven-snapshots/") }
+}
+
 fun getProps(propName: String): String {
     val propsInEnv = System.getenv("LOCAL_PROPERTIES")
     if (propsInEnv != null) {
         val props = Properties()
         props.load(ByteArrayInputStream(Base64.getDecoder().decode(propsInEnv)))
         val value = props.getProperty(propName)
-        if (value != null) {
-            return value
-        }
+        if (value != null) return value
     }
     val propsFile = rootProject.file("local.properties")
     if (propsFile.exists()) {
         val props = Properties()
         props.load(FileInputStream(propsFile))
         val value = props.getProperty(propName)
-        if (value != null) {
-            return value
-        }
+        if (value != null) return value
     }
     return ""
 }
@@ -46,9 +51,7 @@ fun getVersionProps(propName: String): String {
         val props = Properties()
         props.load(FileInputStream(propsFile))
         val value = props.getProperty(propName)
-        if (value != null) {
-            return value
-        }
+        if (value != null) return value
     }
     return ""
 }
@@ -59,7 +62,6 @@ android {
     compileSdkMinor = 1
 
     ndkVersion = "28.0.13004108"
-
     System.getenv("ANDROID_NDK_HOME")?.let { ndkPath = it }
 
     ksp {
@@ -179,10 +181,10 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // ============ libbox – use the local AAR built from source ============
+    // ===== libbox – use the local AAR built from source =====
     implementation(files("libs/libbox.aar"))
 
-    // API level specific versions (unchanged)
+    // ===== Essential libraries (kept) =====
     val lifecycleVersion24 = "2.11.0"
     val roomVersion24 = "2.8.4"
     val workVersion24 = "2.11.2"
@@ -201,7 +203,7 @@ dependencies {
     val coreVersion21 = "1.17.0"
     val materialVersion21 = "1.13.0"
 
-    // Common dependencies
+    // Common
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.8")
@@ -216,7 +218,7 @@ dependencies {
     }
     implementation("com.google.guava:guava:33.6.0-android")
 
-    // API 24+ dependencies (play/other)
+    // API 24+
     "playImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion24")
     "playImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion24")
     "playImplementation"("androidx.lifecycle:lifecycle-process:$lifecycleVersion24")
@@ -246,7 +248,7 @@ dependencies {
     "otherImplementation"("com.google.android.material:material:$materialVersion24")
     "kspOther"("androidx.room:room-compiler:$roomVersion24")
 
-    // API 21 dependencies (otherLegacy)
+    // API 21
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion21")
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion21")
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-process:$lifecycleVersion21")
@@ -279,27 +281,17 @@ dependencies {
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "playImplementation"("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
-    // Shizuku
+    // Shizuku (kept – from mavenCentral)
     val shizukuVersion = "13.1.5"
     "playImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
     "playImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
     "otherImplementation"("dev.rikka.shizuku:api:$shizukuVersion")
     "otherImplementation"("dev.rikka.shizuku:provider:$shizukuVersion")
 
-    // libsu
-    val libsuVersion = "6.0.0"
-    "playImplementation"("com.github.topjohnwu.libsu:core:$libsuVersion")
-    "playImplementation"("com.github.topjohnwu.libsu:service:$libsuVersion")
-    "otherImplementation"("com.github.topjohnwu.libsu:core:$libsuVersion")
-    "otherImplementation"("com.github.topjohnwu.libsu:service:$libsuVersion")
-    "otherLegacyImplementation"("com.github.topjohnwu.libsu:core:$libsuVersion")
-    "otherLegacyImplementation"("com.github.topjohnwu.libsu:service:$libsuVersion")
-
     // Compose – API 24+
     val composeBom24 = platform("androidx.compose:compose-bom:2026.06.01")
     val activityVersion24 = "1.13.0"
     val lifecycleComposeVersion24 = "2.11.0"
-
     "playImplementation"(composeBom24)
     "playImplementation"("androidx.compose.material3:material3")
     "playImplementation"("androidx.compose.material3.adaptive:adaptive")
@@ -326,7 +318,6 @@ dependencies {
     val composeBom21 = platform("androidx.compose:compose-bom:2025.01.00")
     val activityVersion21 = "1.11.0"
     val lifecycleComposeVersion21 = "2.9.4"
-
     "otherLegacyImplementation"(composeBom21)
     "otherLegacyImplementation"("androidx.compose.material3:material3")
     "otherLegacyImplementation"("androidx.compose.material3.adaptive:adaptive")
@@ -338,7 +329,7 @@ dependencies {
     "otherLegacyImplementation"("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleComposeVersion21")
     "otherLegacyImplementation"("androidx.compose.runtime:runtime-livedata")
 
-    // Debug/Test
+    // Debug/test
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     "androidTestPlayImplementation"(composeBom24)
@@ -348,19 +339,18 @@ dependencies {
 
     // Compose extras
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
-    implementation("com.github.jeziellago:compose-markdown:0.7.2")
-    implementation("org.kodein.emoji:emoji-kt:2.5.0")
+    // implementation("com.github.jeziellago:compose-markdown:0.7.2")  // REMOVED
 
-    // Terminal emulator
-    val libghosttyVersion = "0.1.0-SNAPSHOT"
-    implementation("io.github.sagernet:libghostty-android:$libghosttyVersion")
-    implementation("io.github.sagernet:libghostty-android-extras:$libghosttyVersion")
-    "playImplementation"("io.github.sagernet:libghostty-android-compose:$libghosttyVersion")
-    "otherImplementation"("io.github.sagernet:libghostty-android-compose:$libghosttyVersion")
-    "otherLegacyImplementation"("io.github.sagernet:libghostty-android-compose-legacy:$libghosttyVersion")
+    // =================================================================
+    // The following dependencies have been REMOVED because they are not
+    // essential for SSH + payload injection and caused resolution problems.
+    // If you need them later, restore them with the correct repository.
+    // =================================================================
+    // Terminal emulator (libghostty) – removed
+    // Root (libsu) – removed
 }
 
-// For libghostty-android snapshots
+// For libghostty snapshots – no longer needed since we removed it
 configurations.configureEach {
     resolutionStrategy.cacheChangingModulesFor(0, "seconds")
 }
