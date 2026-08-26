@@ -1,12 +1,9 @@
 name: Build Gtunnel APK
 
 on:
-  # Runs on push to ANY branch
   push:
-    # Remove the 'branches' filter to run on all branches
-  # Also runs on pull requests (optional)
+    # Runs on every push to any branch
   pull_request:
-  # Allows manual trigger via Actions tab
   workflow_dispatch:
 
 jobs:
@@ -14,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout app code
       uses: actions/checkout@v4
       with:
         submodules: recursive
@@ -31,19 +28,39 @@ jobs:
         ndk: '28.0.13004108'
         build-tools: '34.0.0'
 
+    # ============ Build libbox from source ============
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Install gomobile
+      run: |
+        go install golang.org/x/mobile/cmd/gomobile@latest
+        gomobile init
+
+    - name: Clone sing-box and build libbox.aar
+      run: |
+        # Use a specific version/tag for reproducibility (e.g., v1.10.0)
+        git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
+        cd sing-box
+        # Build the AAR for all Android architectures
+        gomobile bind -target=android -o libbox.aar ./experimental/libbox
+        # Create the libs folder if it doesn't exist
+        mkdir -p ../app/libs
+        cp libbox.aar ../app/libs/
+      continue-on-error: false   # fail if libbox build fails
+
+    - name: List libbox.aar to verify
+      run: ls -la app/libs/libbox.aar
+
+    # ============ Build the Android app ============
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # Optional: list available tasks (debugging)
-    - name: List available Gradle tasks
-      run: ./gradlew tasks --all | grep -i assemble
-
-    # Build debug APK (no signing required)
     - name: Build Debug APK
-      run: |
-        ./gradlew :app:assembleDebug --stacktrace
+      run: ./gradlew :app:assembleDebug --stacktrace
 
-    # Upload the debug APK as "Gtunnel"
     - name: Upload Gtunnel Debug APK
       uses: actions/upload-artifact@v4
       with:
