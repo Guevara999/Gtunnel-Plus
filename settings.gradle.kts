@@ -11,21 +11,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Required for:
-        // - com.github.jeziellago:compose-markdown
-        // - com.github.topjohnwu.libsu:core and :service
+        // JitPack for libsu and compose-markdown
         maven { url = uri("https://jitpack.io") }
-
-        // Required for:
-        // - io.github.sagernet:libghostty-android
-        // - io.github.sagernet:libghostty-android-extras
-        // - io.github.sagernet:libghostty-android-compose
-        // (libbox is now provided locally, so we keep this repo only for these artifacts)
+        // Nekohasekai repository for libghostty (if kept) and other SagerNet artifacts
         maven { url = uri("https://maven.nekohasekai.io/repository/maven-public/") }
+        // Snapshots repo for SNAPSHOT versions
+        maven { url = uri("https://maven.nekohasekai.io/repository/maven-snapshots/") }
     }
 }
 
 rootProject.name = "Gtunnel-Plus"
 include(":app")
-// If you have other modules, include them here
-// include(":libxposed-api")
