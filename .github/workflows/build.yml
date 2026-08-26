@@ -41,7 +41,9 @@ jobs:
       run: |
         git clone --depth 1 --branch v1.10.0 https://github.com/SagerNet/sing-box.git
         cd sing-box
-        go get -tool golang.org/x/mobile/cmd/gobind
+        # Add the required dependency to go.mod
+        go get golang.org/x/mobile/cmd/gobind
+        go mod tidy
 
     - name: Build libbox.aar
       run: |
