@@ -11,11 +11,21 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // The custom Maven repository has been removed – we now use a local libbox.aar
+        // Required for:
+        // - com.github.jeziellago:compose-markdown
+        // - com.github.topjohnwu.libsu:core and :service
+        maven { url = uri("https://jitpack.io") }
+
+        // Required for:
+        // - io.github.sagernet:libghostty-android
+        // - io.github.sagernet:libghostty-android-extras
+        // - io.github.sagernet:libghostty-android-compose
+        // (libbox is now provided locally, so we keep this repo only for these artifacts)
+        maven { url = uri("https://maven.nekohasekai.io/repository/maven-public/") }
     }
 }
 
 rootProject.name = "Gtunnel-Plus"
 include(":app")
-// If you have other modules, include them here (e.g., ":libxposed-api")
+// If you have other modules, include them here
 // include(":libxposed-api")
