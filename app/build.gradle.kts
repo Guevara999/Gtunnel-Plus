@@ -53,6 +53,11 @@ fun getVersionProps(propName: String): String {
     return ""
 }
 
+// ============ Read libbox_version from gradle.properties or fallback ============
+val libboxVersion: String by lazy {
+    project.findProperty("libbox_version") as String? ?: "1.10.0"
+}
+
 android {
     namespace = "io.nekohasekai.sfa"
     compileSdk = 37
@@ -139,7 +144,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        // Required by android-tree-sitter
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -180,10 +184,10 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // ============ libbox – from Maven Central (FIXED) ============
-    implementation("io.nekohasekai:libbox:$libbox_version")
+    // ============ libbox – from Maven Central (with fallback version) ============
+    implementation("io.nekohasekai:libbox:$libboxVersion")
 
-    // API level specific versions
+    // API level specific versions (unchanged)
     val lifecycleVersion24 = "2.11.0"
     val roomVersion24 = "2.8.4"
     val workVersion24 = "2.11.2"
@@ -377,7 +381,7 @@ if (playCredentialsJSON.exists()) {
         defaultToAppBundles.set(true)
         val version = getVersionProps("VERSION_NAME")
         track.set(
-            if (version.contains("alpha") || version.contains("beta")/* || version.contains("rc")*/) {
+            if (version.contains("alpha") || version.contains("beta")) {
                 "beta"
             } else {
                 "production"
