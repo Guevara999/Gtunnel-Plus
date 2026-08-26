@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-// Fallback repositories (they are also in settings.gradle.kts)
+// Fallback repositories
 repositories {
     google()
     mavenCentral()
@@ -61,7 +61,9 @@ android {
     compileSdk = 37
     compileSdkMinor = 1
 
-    ndkVersion = "28.0.13004108"
+    // Match the NDK version installed in the workflow
+    ndkVersion = "27.3.13750724"
+
     System.getenv("ANDROID_NDK_HOME")?.let { ndkPath = it }
 
     ksp {
@@ -122,10 +124,46 @@ android {
         getByName("other") {
             java.directories.addAll(listOf("src/minApi24/java", "src/github/java"))
             aidl.directories.add("src/minApi24/aidl")
+            // ===== EXCLUDE OPTIONAL FEATURES =====
+            java {
+                exclude("**/xposed/**")
+                exclude("**/terminal/**")
+                exclude("**/usbip/**")
+                exclude("**/vendor/**")
+                exclude("**/compose/screen/tools/**")
+                exclude("**/bg/RootClient.kt")
+                exclude("**/bg/RootServer.kt")
+                exclude("**/utils/HookErrorClient.kt")
+                exclude("**/utils/HookStatusClient.kt")
+                exclude("**/utils/PrivilegeSettingsClient.kt")
+                exclude("**/tailscale/**")
+                exclude("**/openconnect/**")
+                exclude("**/openvpn/**")
+                exclude("**/networkquality/**")
+                exclude("**/stun/**")
+            }
         }
         getByName("otherLegacy") {
             java.directories.addAll(listOf("src/minApi21/java", "src/github/java"))
             aidl.directories.add("src/minApi24/aidl")
+            // Apply same exclusions for legacy variant
+            java {
+                exclude("**/xposed/**")
+                exclude("**/terminal/**")
+                exclude("**/usbip/**")
+                exclude("**/vendor/**")
+                exclude("**/compose/screen/tools/**")
+                exclude("**/bg/RootClient.kt")
+                exclude("**/bg/RootServer.kt")
+                exclude("**/utils/HookErrorClient.kt")
+                exclude("**/utils/HookStatusClient.kt")
+                exclude("**/utils/PrivilegeSettingsClient.kt")
+                exclude("**/tailscale/**")
+                exclude("**/openconnect/**")
+                exclude("**/openvpn/**")
+                exclude("**/networkquality/**")
+                exclude("**/stun/**")
+            }
         }
     }
 
@@ -241,7 +279,7 @@ dependencies {
     "otherLegacyImplementation"("com.google.android.material:material:1.13.0")
     "kspOtherLegacy"("androidx.room:room-compiler:2.7.2")
 
-    // Sora editor (for configuration editing)
+    // Sora editor
     val soraVersion = "0.23.6"
     val treeSitterVersion = "4.3.2"
     listOf("play", "other").forEach { flavor ->
@@ -253,11 +291,11 @@ dependencies {
     "otherLegacyImplementation"("com.blacksquircle.ui:editorkit:2.2.0")
     "otherLegacyImplementation"("com.blacksquircle.ui:language-json:2.2.0")
 
-    // Play Store specific
+    // Play Store
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "playImplementation"("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
-    // Shizuku (optional, but safe)
+    // Shizuku (optional)
     val shizukuVersion = "13.1.5"
     listOf("play", "other").forEach { flavor ->
         add("${flavor}Implementation", "dev.rikka.shizuku:api:$shizukuVersion")
@@ -302,14 +340,12 @@ dependencies {
     implementation("sh.calvin.reorderable:reorderable:3.1.0")
 
     // ============================================================
-    // ❌ REMOVED (commented out) to avoid dependency resolution errors:
-    // - libghostty (terminal emulator)
-    // - compose-markdown
-    // - libsu (root)
+    // Optional features removed (libghostty, libsu, compose-markdown, etc.)
+    // They are excluded by sourceSets exclusions above.
     // ============================================================
 }
 
-// No more configurations for libghostty snapshots – removed.
+// No configurations needed for removed snapshots.
 
 val playCredentialsJSON = rootProject.file("service-account-credentials.json")
 if (playCredentialsJSON.exists()) {
