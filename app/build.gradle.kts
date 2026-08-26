@@ -9,7 +9,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    // ❌ Removed: id("org.jetbrains.kotlin.android")  // no longer needed with AGP 9.0+
     id("org.jetbrains.kotlin.plugin.parcelize")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -116,7 +116,7 @@ android {
         }
     }
 
-    // ===== FIXED SOURCE SETS =====
+    // ===== FIXED SOURCE SETS WITH EXCLUSIONS =====
     sourceSets {
         getByName("play") {
             java.setSrcDirs(listOf("src/minApi24/java"))
@@ -224,6 +224,9 @@ dependencies {
 
     // === libbox – local AAR built from source ===
     implementation(files("libs/libbox.aar"))
+
+    // === Add Kotlin stdlib explicitly (AGP 9.0+ built‑in Kotlin may not include it) ===
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.20")
 
     // === Essential AndroidX & Compose ===
     val lifecycleVersion = "2.11.0"
