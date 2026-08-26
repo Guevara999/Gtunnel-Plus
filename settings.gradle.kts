@@ -5,18 +5,22 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
+    // This setting forces all repositories to be declared here (not in subprojects)
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    
     repositories {
         google()
         mavenCentral()
-        // For libghostty-android snapshots; remove after release.
-        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://api.xposed.info/") }
+        
+        // ============ ADD CUSTOM REPOSITORY FOR libbox ============
+        maven {
+            url = uri("https://maven.nekohasekai.io/repository/maven-public/")
+        }
     }
 }
-rootProject.name = "sing-box"
+
+rootProject.name = "Gtunnel-Plus"
 include(":app")
-include(":libxposed-api")
-project(":libxposed-api").projectDir = file("third_party/libxposed-api")
+// include any other modules you have (e.g., ":libxposed-api")
